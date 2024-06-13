@@ -2,19 +2,10 @@
 #define CAMERA_H
 
 #include "rtweekend.h"
-
+#include <vector>
+#include <string>
 #include "hittable.h"
 #include "material.h"
-
-class image {
-    public:
-        std::vector<std::vector<std::string>> image_array;
-
-    image(int x, int y) {
-        image_array = std::vector<std::vector<std::string>>(y, std::vector<std::string>(x, 0));
-    }
-};
-
 
 class camera {
     public:
@@ -30,12 +21,13 @@ class camera {
 
         double defocus_angle = 0;
         double focus_dist = 10;
+        
+        int threads = 1;
 
         void render(const hittable& world) {
             initialize();
-
             std::cout << "P3\n" << image_width << " " << image_height << "\n255\n";
-            #pragma omp parallel for num_threads(12)
+            #pragma omp parallel for num_threads(threads)
             for (int j = 0; j < image_height; j++) {
                 //std::clog << "\rScanlines remaining: " << (image_height - j) << " " << std::flush;
                 for (int i = 0; i < image_width; i++) {
@@ -44,7 +36,13 @@ class camera {
                         ray r = get_ray(i,j);
                         pixel_color += ray_color(r, max_depth, world);
                     }
-                    img.image_array[j][i] = write_color(pixel_samples_scale*pixel_color);
+                    //std::clog << i << " " << j << " " << std::flush;
+                    image_array[j][i] = write_color(pixel_samples_scale*pixel_color);
+                }
+            }
+            for (auto i: image_array) {
+                for (auto j: i) {
+                    std::cout << j << '\n';
                 }
             }
             std::clog << "\r Done. \n";
@@ -61,12 +59,10 @@ class camera {
         vec3 defocus_disk_u;
         vec3 defocus_disk_v;
         
-        image img;
+        std::vector<std::vector<std::string>> image_array;
 
         void initialize() {
             image_height = fmax(int(image_width/aspect_ratio), 1);
-
-            img = image(image_width, image_height);
 
             pixel_samples_scale = 1.0/samples_per_pixel;
 
@@ -102,6 +98,8 @@ class camera {
             auto defocus_radius = focus_dist * tan(degree_to_radians(defocus_angle/2));
             defocus_disk_u = u*defocus_radius;
             defocus_disk_v = v*defocus_radius;
+
+            image_array =  std::vector<std::vector<std::string>>(image_height, std::vector<std::string>(image_width, ""));
         }
 
         ray get_ray(int i, int j) const {

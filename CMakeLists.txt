@@ -1,18 +1,20 @@
 cmake_minimum_required(VERSION 3.10)
 
-# Set the project name and languages
-project(Raytracing LANGUAGES CXX)
+# Set the project name and version
+project(RayTracing VERSION 1.0)
 
-# Set the C++ standard
+# Specify the C++ standard
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# Specify the C++ compiler explicitly
-set(CMAKE_CXX_COMPILER C:/msys64/ucrt64/bin/gcc.exe)
+# Find OpenMP
+find_package(OpenMP REQUIRED)
 
-# Add the executable target
-add_executable(Raytracing main.cc)
+# Add the executable
+add_executable(RayTracing main.cpp)
 
-# Link against the standard C++ library
-target_link_libraries(Raytracing stdc++)
+# Include directories
+target_include_directories(RayTracing PRIVATE ${CMAKE_SOURCE_DIR})
+
+# Link against OpenMP
+target_link_libraries(RayTracing PRIVATE OpenMP::OpenMP_CXX)

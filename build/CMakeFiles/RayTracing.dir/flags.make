@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = 
+CXX_INCLUDES = -I/home/genshin/RayTracing
 
-CXX_FLAGS = -std=c++11
+CXX_FLAGS = -fopenmp -std=gnu++11
 
